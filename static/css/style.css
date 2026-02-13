@@ -166,13 +166,23 @@ header {
 /* Main Layout */
 .main-grid {
     display: grid;
-    grid-template-columns: 380px 1fr 350px;
+    grid-template-columns: 1fr 1fr;
+    /* Balanced 2-column layout */
     gap: 2rem;
     padding: 2rem;
     max-width: var(--max-width);
     margin: 0 auto;
     width: 100%;
-    flex: 1;
+    align-items: start;
+    /* Align items to top */
+}
+
+.col-left,
+.col-right {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    /* Gap between cards in the same column */
 }
 
 .grid-2 {
