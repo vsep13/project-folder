@@ -1,0 +1,12 @@
+version: '3'
+services:
+  folder-creator:
+    build: .
+    container_name: folder_creator
+    ports:
+      - "5050:5000"
+    volumes:
+      # IMPORTANT: Change '/volume1/Projects' to the real path on your Ugreen NAS
+      - /volume1/Projects:/data
+      - ./config:/config
+    restart: unless-stopped

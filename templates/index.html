@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nine.Nine.Nine - Project Creator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="flash-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+    </div>
+
+    <header>
+        <div class="logo">
+            <h1>NINE.NINE.NINE.</h1>
+        </div>
+        <div class="top-nav">
+            <a href="/settings" class="nav-btn">
+                <span>⚙️</span> Manage Settings
+            </a>
+            <a href="https://github.com" target="_blank" class="nav-btn">
+                <span>GitHub</span>
+            </a>
+        </div>
+    </header>
+
+    <main class="main-grid">
+        <!-- COLUMN 1: Project Details -->
+        <form method="POST" id="project-form">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon wait">📄</div>
+                    <div class="card-title">
+                        <h2>Project Details</h2>
+                        <p>Core information</p>
+                    </div>
+                </div>
+
+                {% if not data.clients %}
+                <div class="flash error inline">
+                    <strong>No Clients Found!</strong> Please go to <a href="/settings">Settings</a> to add a client
+                    first.
+                </div>
+                {% endif %}
+
+                <div class="form-group">
+                    <label>Client Name</label>
+                    <select name="client_index" required>
+                        <option value="" disabled selected>-- Choose Client --</option>
+                        {% for client in data.clients %}
+                        <option value="{{ loop.index0 }}">{{ client.name }} ({{ client.code }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Project Name</label>
+                    <input type="text" name="project_name" placeholder="Summer Campaign" required autocomplete="off">
+                </div>
+
+                <div class="form-group">
+                    <label>Job Number</label>
+                    <input type="text" name="job_no" placeholder="e.g. 5020999" required autocomplete="off">
+                </div>
+
+                <div class="toggle-group">
+                    <label style="margin:0">Append Date YYYY-MM</label>
+                    <label class="toggle-switch">
+                        <input type="checkbox" name="append_date" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Preset Selection -->
+            <div class="card" style="margin-top: 1.5rem">
+                <div class="card-header">
+                    <div class="card-icon purple">📚</div>
+                    <div class="card-title">
+                        <h2>Project Preset</h2>
+                        <p>Template management</p>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Active Template</label>
+                    <select name="preset">
+                        {% for name, structure in data.presets.items() %}
+                        <option value="{{ name }}">{{ name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="info-box">
+                    Select a preset to visualize the folder structure before creation.
+                </div>
+            </div>
+        </form>
+
+        <!-- COLUMN 2: Preview -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-icon gray">👁️</div>
+                <div class="card-title">
+                    <h2>Folder Preview</h2>
+                    <p>Interactive structure builder</p>
+                </div>
+            </div>
+
+            <div class="preview-controls">
+                <button type="button" class="btn-sm" id="expand-all">Expand All</button>
+                <button type="button" class="btn-sm" id="collapse-all">Collapse All</button>
+            </div>
+
+            <div id="tree-view" class="tree-view">
+                <!-- Javascript will populate this -->
+            </div>
+        </div>
+
+        <!-- COLUMN 3: Actions -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-icon black">📦</div>
+                <div class="card-title">
+                    <h2>Export & Download</h2>
+                    <p>Generate your structure</p>
+                </div>
+            </div>
+
+            <div class="download-ready">
+                <div style="margin-bottom: 1rem; font-weight: 600; font-size: 0.9rem; color: var(--primary-dark);">Ready
+                    to Download</div>
+                <div class="download-info">
+                    <div class="info-row">
+                        <span class="info-label">Client:</span>
+                        <span class="info-val" id="preview-client">—</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Project:</span>
+                        <span class="info-val" id="preview-project">—</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Job No:</span>
+                        <span class="info-val" id="preview-job">—</span>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" form="project-form" name="action" value="download" class="btn-primary">
+                <span>⬇️</span> Download Folder Structure
+            </button>
+
+            <button type="submit" form="project-form" name="action" value="create" class="btn-secondary">
+                <span>🖥️</span> Create on NAS
+            </button>
+
+            <div style="margin-top: 2rem">
+                <h3 class="subsection-title">What's Included</h3>
+                <ul class="feature-list">
+                    <li>
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
+                            </path>
+                        </svg>
+                        Complete folder structure based on your selections
+                    </li>
+                    <li>
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
+                            </path>
+                        </svg>
+                        Compatible with Mac, Windows, and Linux
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Inject data from Flask
+        window.appData = {{ data | tojson }};
+    </script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+
+</html>

@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environment
+venv/
+env/
+
+# Mac
+.DS_Store
+
+# Config (Keep example, ignore actual)
+config/settings.json
+
+# Docker context
+ugreen_folder_app.zip

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Nine.Nine.Nine</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <header>
+        <div class="logo">
+            <h1>NINE.NINE.NINE.</h1>
+        </div>
+        <div class="top-nav">
+            <a href="/" class="nav-btn">
+                <span>←</span> Back to Dashboard
+            </a>
+        </div>
+    </header>
+
+    <main class="grid-2">
+        <!-- Client Management -->
+        <section>
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon blue">👥</div>
+                    <div class="card-title">
+                        <h2>Manage Clients</h2>
+                        <p>Add or remove client codes</p>
+                    </div>
+                </div>
+
+                <form method="POST">
+                    <input type="hidden" name="action" value="add_client">
+                    <div class="form-group">
+                        <label>Client Name</label>
+                        <input type="text" name="client_name" placeholder="e.g. Acme Corp" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Client Code</label>
+                        <input type="text" name="client_code" placeholder="e.g. ACM" required>
+                    </div>
+                    <button type="submit" class="btn-primary">
+                        <span>+</span> Add New Client
+                    </button>
+                </form>
+
+                <div style="margin-top: 2rem;">
+                    <h3 class="subsection-title">Existing Clients</h3>
+
+                    {% if not data.clients %}
+                    <div style="text-align: center; color: var(--text-muted); padding: 1rem;">No clients found.</div>
+                    {% else %}
+                    {% for client in data.clients %}
+                    <div class="list-item">
+                        <div>
+                            <strong style="color: var(--text-main);">{{ client.name }}</strong>
+                            <span class="code-badge">{{ client.code }}</span>
+                        </div>
+                        <form method="POST" style="margin:0;">
+                            <input type="hidden" name="action" value="delete_client">
+                            <input type="hidden" name="client_index" value="{{ loop.index0 }}">
+                            <button class="btn-sm btn-danger">Remove</button>
+                        </form>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+
+        <!-- Preset Management -->
+        <section>
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon purple">📁</div>
+                    <div class="card-title">
+                        <h2>Folder Presets</h2>
+                        <p>Define structure templates</p>
+                    </div>
+                </div>
+
+                <form method="POST">
+                    <input type="hidden" name="action" value="add_preset">
+                    <div class="form-group">
+                        <label>Preset Name</label>
+                        <input type="text" name="preset_name" placeholder="e.g. Video Production" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Folder Structure</label>
+                        <p class="help-text">Enter one folder path per line</p>
+                        <textarea name="preset_content"
+                            placeholder="01_Admin/Brief&#10;02_Assets/Raw&#10;03_Output/Final" rows="6"
+                            required></textarea>
+                    </div>
+                    <button type="submit" class="btn-primary" style="background: hsl(300, 70%, 50%);">
+                        <span>💾</span> Save Preset
+                    </button>
+                </form>
+
+                <div style="margin-top: 2rem;">
+                    <h3 class="subsection-title">Saved Presets</h3>
+
+                    {% if not data.presets %}
+                    <div style="text-align: center; color: var(--text-muted); padding: 1rem;">No presets found.</div>
+                    {% else %}
+                    {% for name in data.presets %}
+                    <div class="list-item">
+                        <span style="font-weight: 500;">{{ name }}</span>
+                        <form method="POST" style="margin:0;">
+                            <input type="hidden" name="action" value="delete_preset">
+                            <input type="hidden" name="preset_name" value="{{ name }}">
+                            <button class="btn-sm btn-danger">Delete</button>
+                        </form>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+    </main>
+</body>
+
+</html>
