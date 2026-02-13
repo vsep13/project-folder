@@ -166,33 +166,89 @@ header {
 /* Main Layout */
 .main-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    /* Balanced 2-column layout */
+    grid-template-columns: 380px 1fr 350px;
     gap: 2rem;
     padding: 2rem;
     max-width: var(--max-width);
     margin: 0 auto;
     width: 100%;
-    align-items: start;
-    /* Align items to top */
+    /* Full viewport height minus header (approx 80px) and padding */
+    height: calc(100vh - 100px);
+    overflow: hidden;
+    /* Prevent body scroll */
 }
 
-.col-left,
-.col-right {
+/* Columns */
+.col-inputs,
+.col-actions {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
-    /* Gap between cards in the same column */
+    overflow-y: auto;
+    /* Allow scrolling within columns if needed */
+    padding-bottom: 2rem;
+    /* Comfortable padding */
 }
 
-.grid-2 {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2rem;
-    padding: 2rem;
-    max-width: var(--max-width);
-    margin: 0 auto;
-    width: 100%;
+.col-preview {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    /* Container doesn't scroll, tree-view does */
+}
+
+/* Tree View */
+.tree-view {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    background: var(--bg-main);
+    padding: 1rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-light);
+    margin-top: 1rem;
+    flex: 1;
+    /* Fill remaining height */
+    overflow-y: auto;
+    /* Scroll internally */
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .main-grid {
+        grid-template-columns: 350px 1fr;
+        height: auto;
+        /* Allow auto height on smaller screens */
+        overflow: visible;
+    }
+
+    .col-actions {
+        grid-column: 1 / -1;
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .col-preview {
+        height: 600px;
+        /* Fixed height on tablet */
+    }
+}
+
+@media (max-width: 900px) {
+    .main-grid {
+        grid-template-columns: 1fr;
+        height: auto;
+    }
+
+    .col-actions {
+        flex-direction: column;
+    }
+
+    .col-preview {
+        height: 500px;
+    }
 }
 
 /* Cards */

@@ -48,95 +48,136 @@
     </header>
 
     <main class="main-grid">
-        <form method="POST" id="project-form" class="col-left">
-            <!-- COLUMN 1: Project Details -->
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-icon wait">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                            <polyline points="14 2 14 8 20 8"></polyline>
-                            <line x1="16" y1="13" x2="8" y2="13"></line>
-                            <line x1="16" y1="17" x2="8" y2="17"></line>
-                            <polyline points="10 9 9 9 8 9"></polyline>
-                        </svg>
+        <!-- COLUMN 1: Project Details & Preset -->
+        <div class="col-inputs">
+            <form method="POST" id="project-form">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon wait">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                                <line x1="16" y1="13" x2="8" y2="13"></line>
+                                <line x1="16" y1="17" x2="8" y2="17"></line>
+                                <polyline points="10 9 9 9 8 9"></polyline>
+                            </svg>
+                        </div>
+                        <div class="card-title">
+                            <h2>Project Details</h2>
+                            <p>Core information</p>
+                        </div>
                     </div>
-                    <div class="card-title">
-                        <h2>Project Details</h2>
-                        <p>Core information</p>
+
+                    {% if not data.clients %}
+                    <div class="flash error inline">
+                        <strong>No Clients Found!</strong> Please go to <a href="/settings">Settings</a> to add a client
+                        first.
+                    </div>
+                    {% endif %}
+
+                    <div class="form-group">
+                        <label>Client Name</label>
+                        <select name="client_index" required>
+                            <option value="" disabled selected>-- Choose Client --</option>
+                            {% for client in data.clients %}
+                            <option value="{{ loop.index0 }}">{{ client.name }} ({{ client.code }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Project Name</label>
+                        <input type="text" name="project_name" placeholder="Summer Campaign" required
+                            autocomplete="off">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Job Number</label>
+                        <input type="text" name="job_no" placeholder="e.g. 5020999" required autocomplete="off">
+                    </div>
+
+                    <div class="toggle-group">
+                        <label style="margin:0">Append Date YYYY-MM</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" name="append_date" checked>
+                            <span class="slider"></span>
+                        </label>
                     </div>
                 </div>
 
-                {% if not data.clients %}
-                <div class="flash error inline">
-                    <strong>No Clients Found!</strong> Please go to <a href="/settings">Settings</a> to add a client
-                    first.
-                </div>
-                {% endif %}
+                <!-- Preset Selection -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon purple">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                            </svg>
+                        </div>
+                        <div class="card-title">
+                            <h2>Project Preset</h2>
+                            <p>Template management</p>
+                        </div>
+                    </div>
 
-                <div class="form-group">
-                    <label>Client Name</label>
-                    <select name="client_index" required>
-                        <option value="" disabled selected>-- Choose Client --</option>
-                        {% for client in data.clients %}
-                        <option value="{{ loop.index0 }}">{{ client.name }} ({{ client.code }})</option>
-                        {% endfor %}
-                    </select>
-                </div>
+                    <div class="form-group">
+                        <label>Active Template</label>
+                        <select name="preset">
+                            {% for name, structure in data.presets.items() %}
+                            <option value="{{ name }}">{{ name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
 
-                <div class="form-group">
-                    <label>Project Name</label>
-                    <input type="text" name="project_name" placeholder="Summer Campaign" required autocomplete="off">
+                    <div class="info-box">
+                        Select a preset to visualize the folder structure before creation.
+                    </div>
                 </div>
+            </form>
+        </div>
 
-                <div class="form-group">
-                    <label>Job Number</label>
-                    <input type="text" name="job_no" placeholder="e.g. 5020999" required autocomplete="off">
+        <!-- COLUMN 2: Preview (Full Height) -->
+        <div class="card col-preview">
+            <div class="card-header">
+                <div class="card-icon gray">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
                 </div>
-
-                <div class="toggle-group">
-                    <label style="margin:0">Append Date YYYY-MM</label>
-                    <label class="toggle-switch">
-                        <input type="checkbox" name="append_date" checked>
-                        <span class="slider"></span>
-                    </label>
+                <div class="card-title">
+                    <h2>Folder Preview</h2>
+                    <p>Interactive structure builder</p>
                 </div>
             </div>
 
-            <!-- Preset Selection -->
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-icon purple">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-                        </svg>
-                    </div>
-                    <div class="card-title">
-                        <h2>Project Preset</h2>
-                        <p>Template management</p>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Active Template</label>
-                    <select name="preset">
-                        {% for name, structure in data.presets.items() %}
-                        <option value="{{ name }}">{{ name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div class="info-box">
-                    Select a preset to visualize the folder structure before creation.
-                </div>
+            <div class="preview-controls">
+                <button type="button" class="btn-sm btn-ghost" id="expand-all">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                    Expand All
+                </button>
+                <button type="button" class="btn-sm btn-ghost" id="collapse-all">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="18 15 12 9 6 15"></polyline>
+                    </svg>
+                    Collapse All
+                </button>
             </div>
-        </form>
 
-        <div class="col-right">
-            <!-- COLUMN 2: Actions & Download (Moved up for importance) -->
+            <div id="tree-view" class="tree-view">
+                <!-- Javascript will populate this -->
+            </div>
+        </div>
+
+        <!-- COLUMN 3: Actions -->
+        <div class="col-actions">
             <div class="card">
                 <div class="card-header">
                     <div class="card-icon black">
@@ -215,44 +256,6 @@
                             Compatible with Mac, Windows, and Linux
                         </li>
                     </ul>
-                </div>
-            </div>
-
-            <!-- COLUMN 3: Preview -->
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-icon gray">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                            <circle cx="12" cy="12" r="3"></circle>
-                        </svg>
-                    </div>
-                    <div class="card-title">
-                        <h2>Folder Preview</h2>
-                        <p>Interactive structure builder</p>
-                    </div>
-                </div>
-
-                <div class="preview-controls">
-                    <button type="button" class="btn-sm btn-ghost" id="expand-all">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="6 9 12 15 18 9"></polyline>
-                        </svg>
-                        Expand All
-                    </button>
-                    <button type="button" class="btn-sm btn-ghost" id="collapse-all">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="18 15 12 9 6 15"></polyline>
-                        </svg>
-                        Collapse All
-                    </button>
-                </div>
-
-                <div id="tree-view" class="tree-view">
-                    <!-- Javascript will populate this -->
                 </div>
             </div>
         </div>
