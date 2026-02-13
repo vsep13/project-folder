@@ -6,7 +6,7 @@ services:
     ports:
       - "5050:5000"
     volumes:
-      # IMPORTANT: Change '/volume1/Projects' to the real path on your Ugreen NAS
-      - /volume1/Projects:/data
+      # Mapping /volume1 on NAS to /data in container
+      - /volume1:/data
       - ./config:/config
     restart: unless-stopped
