@@ -62,10 +62,11 @@ def save_data(data):
     with open(CONFIG_FILE, 'w') as f:
         json.dump(data, f, indent=4)
 
-def slugify(text):
-    text = text.lower()
+def slugify(text, lower=True):
+    if lower:
+        text = text.lower()
     text = re.sub(r'[\s_]+', '-', text)
-    return re.sub(r'[^a-z0-9\-]', '', text)
+    return re.sub(r'[^a-zA-Z0-9\-]', '', text)
 
 def get_readme_content(preset_name, project_name, client_name, client_code, job_no, date_str):
     # Common Sections
@@ -245,10 +246,17 @@ def index():
         client_code = client['code']
 
         # Generate Name
+        # Generate Name
         date_str = datetime.now().strftime("%Y-%m")
-        safe_project_name = slugify(project_name)
+        
+        # Project Name: Sentence case (Capitalize first letter, lower rest of words, hyphens for spaces)
+        # e.g. "summer campaign" -> "Summer-campaign"
+        safe_project_name = slugify(project_name.capitalize(), lower=False)
+        
         safe_job_no = slugify(job_no)
-        safe_client_code = slugify(client_code)
+        
+        # Client Code: Uppercase
+        safe_client_code = slugify(client_code, lower=False).upper()
         
         append_date = request.form.get('append_date')
         
@@ -318,6 +326,7 @@ def settings():
             name = request.form.get('client_name')
             code = request.form.get('client_code')
             if name and code:
+                code = code.upper() # Force uppercase
                 data['clients'].append({'name': name, 'code': code})
                 save_data(data)
                 flash(f"Added client {name}", "success")
@@ -336,7 +345,21 @@ def settings():
             if p_name and p_content:
                 data['presets'][p_name] = p_content
                 save_data(data)
-                flash(f"Added preset {p_name}", "success")
+            if p_name and p_content:
+                data['presets'][p_name] = p_content
+                save_data(data)
+                flash(f"Preset '{p_name}' saved", "success")
+
+        elif action == 'edit_preset':
+            # Same as add, just conceptually different but uses overwrite logic of dict
+            p_name = request.form.get('preset_name')
+            p_content = request.form.get('preset_content').splitlines()
+            p_content = [x.strip() for x in p_content if x.strip()]
+            
+            if p_name and p_content:
+                data['presets'][p_name] = p_content
+                save_data(data)
+                flash(f"Preset '{p_name}' updated", "success")
 
         elif action == 'delete_preset':
             p_name = request.form.get('preset_name')

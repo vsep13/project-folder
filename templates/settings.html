@@ -16,7 +16,11 @@
         </div>
         <div class="top-nav">
             <a href="/" class="nav-btn">
-                <span>←</span> Back to Dashboard
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M19 12H5M12 19l-7-7 7-7" />
+                </svg>
+                Back to Dashboard
             </a>
         </div>
     </header>
@@ -26,7 +30,15 @@
         <section>
             <div class="card">
                 <div class="card-header">
-                    <div class="card-icon blue">👥</div>
+                    <div class="card-icon blue">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                    </div>
                     <div class="card-title">
                         <h2>Manage Clients</h2>
                         <p>Add or remove client codes</p>
@@ -41,10 +53,17 @@
                     </div>
                     <div class="form-group">
                         <label>Client Code</label>
-                        <input type="text" name="client_code" placeholder="e.g. ACM" required>
+                        <input type="text" name="client_code" id="client_code_input" placeholder="e.g. ACM" required>
+                        <p class="help-text" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">
+                            Auto-formatted to UPPERCASE</p>
                     </div>
                     <button type="submit" class="btn-primary">
-                        <span>+</span> Add New Client
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        Add New Client
                     </button>
                 </form>
 
@@ -76,28 +95,42 @@
         <section>
             <div class="card">
                 <div class="card-header">
-                    <div class="card-icon purple">📁</div>
+                    <div class="card-icon purple">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z">
+                            </path>
+                        </svg>
+                    </div>
                     <div class="card-title">
                         <h2>Folder Presets</h2>
                         <p>Define structure templates</p>
                     </div>
                 </div>
 
-                <form method="POST">
+                <form method="POST" id="presetFactory">
+                    <!-- Action will be set by JS dynamically if needed, default is add/edit which are same in backend for overwrites -->
                     <input type="hidden" name="action" value="add_preset">
                     <div class="form-group">
                         <label>Preset Name</label>
-                        <input type="text" name="preset_name" placeholder="e.g. Video Production" required>
+                        <input type="text" name="preset_name" id="preset_name" placeholder="e.g. Video Production"
+                            required>
                     </div>
                     <div class="form-group">
                         <label>Folder Structure</label>
                         <p class="help-text">Enter one folder path per line</p>
-                        <textarea name="preset_content"
-                            placeholder="01_Admin/Brief&#10;02_Assets/Raw&#10;03_Output/Final" rows="6"
+                        <textarea name="preset_content" id="preset_content"
+                            placeholder="01_Admin/Brief&#10;02_Assets/Raw&#10;03_Output/Final" rows="10"
                             required></textarea>
                     </div>
                     <button type="submit" class="btn-primary" style="background: hsl(300, 70%, 50%);">
-                        <span>💾</span> Save Preset
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                            <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                            <polyline points="7 3 7 8 15 8"></polyline>
+                        </svg>
+                        Save Preset
                     </button>
                 </form>
 
@@ -107,14 +140,20 @@
                     {% if not data.presets %}
                     <div style="text-align: center; color: var(--text-muted); padding: 1rem;">No presets found.</div>
                     {% else %}
-                    {% for name in data.presets %}
+                    {% for name, content in data.presets.items() %}
                     <div class="list-item">
                         <span style="font-weight: 500;">{{ name }}</span>
-                        <form method="POST" style="margin:0;">
-                            <input type="hidden" name="action" value="delete_preset">
-                            <input type="hidden" name="preset_name" value="{{ name }}">
-                            <button class="btn-sm btn-danger">Delete</button>
-                        </form>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button type="button" class="btn-sm btn-secondary edit-preset-btn" data-name="{{ name }}"
+                                data-content="{{ content | join('\n') }}">
+                                Edit
+                            </button>
+                            <form method="POST" style="margin:0;">
+                                <input type="hidden" name="action" value="delete_preset">
+                                <input type="hidden" name="preset_name" value="{{ name }}">
+                                <button class="btn-sm btn-danger">Delete</button>
+                            </form>
+                        </div>
                     </div>
                     {% endfor %}
                     {% endif %}
@@ -122,6 +161,7 @@
             </div>
         </section>
     </main>
+    <script src="{{ url_for('static', filename='js/settings.js') }}"></script>
 </body>
 
 </html>

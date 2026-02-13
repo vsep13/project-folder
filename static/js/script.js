@@ -6,11 +6,11 @@ document.addEventListener('DOMContentLoaded', () => {
         projectName: '',
         clientCode: '',
         jobNumber: '',
-        appendDate: true
+        appendDate: true,
+        expanded: true
     };
 
     // Elements
-    const form = document.querySelector('form');
     const presetSelect = document.querySelector('select[name="preset"]');
     const jobInput = document.querySelector('input[name="job_no"]');
     const clientSelect = document.querySelector('select[name="client_index"]');
@@ -22,17 +22,35 @@ document.addEventListener('DOMContentLoaded', () => {
     const previewJob = document.getElementById('preview-job');
 
     // Controls
-    document.getElementById('expand-all').onclick = () => renderTree(true);
-    document.getElementById('collapse-all').onclick = () => renderTree(false);
+    document.getElementById('expand-all').onclick = () => {
+        state.expanded = true;
+        renderTree();
+    };
+    document.getElementById('collapse-all').onclick = () => {
+        state.expanded = false;
+        renderTree();
+    };
 
     // Helpers
-    const slugify = (text) => {
-        return text.toString().toLowerCase()
+    const slugify = (text, keepCase = false) => {
+        let str = text.toString();
+        if (!keepCase) {
+            str = str.toLowerCase();
+        }
+
+        return str
             .replace(/\s+/g, '-')           // Replace spaces with -
-            .replace(/[^\w\-]+/g, '')       // Remove all non-word chars
+            .replace(/[^a-zA-Z0-9\-]+/g, '') // Remove all non-word chars
             .replace(/\-\-+/g, '-')         // Replace multiple - with single -
             .replace(/^-+/, '')             // Trim - from start of text
             .replace(/-+$/, '');            // Trim - from end of text
+    };
+
+    const formatProjectName = (text) => {
+        if (!text) return '';
+        // Sentence case with hyphens: "Summer Campaign" -> "Summer-campaign"
+        const sentenceCase = text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+        return slugify(sentenceCase, true);
     };
 
     const getFolderName = () => {
@@ -42,8 +60,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const dateStr = `${year}-${month}`;
 
         const job = state.jobNumber ? slugify(state.jobNumber) : '000000';
-        const client = state.clientCode ? slugify(state.clientCode) : 'CODE';
-        const project = state.projectName ? slugify(state.projectName) : 'project-name';
+        // Client code is already uppercase coming from select if setup correctly, but force it here for preview
+        const clientText = clientSelect.options[clientSelect.selectedIndex]?.text || '';
+        const match = clientText.match(/\((.*?)\)$/);
+        const code = match ? match[1] : '';
+        const client = code ? slugify(code, true).toUpperCase() : 'CODE';
+
+        const project = state.projectName ? formatProjectName(state.projectName) : 'Project-name';
 
         let name = `${job}_${client}_${project}`;
         if (state.appendDate) {
@@ -52,8 +75,14 @@ document.addEventListener('DOMContentLoaded', () => {
         return name;
     };
 
+    // Icons
+    const ICONS = {
+        folder: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="folder-svg"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>`,
+        file: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="file-svg"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>`
+    };
+
     // Rendering
-    const renderTree = (expandAll = true) => {
+    const renderTree = () => {
         const rootName = getFolderName();
         const folders = state.presets[state.currentPreset] || [];
 
@@ -76,15 +105,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const buildHtml = (node, depth = 0) => {
             const indent = depth * 20;
             const hasChildren = Object.keys(node.children).length > 0;
-            const icon = hasChildren ? '📂' : '📁'; // Simple icons
+            const icon = ICONS.folder;
+
+            const iconClass = hasChildren || node.isRoot ? 'folder-icon dir' : 'folder-icon';
 
             let html = `<div class="folder-item" style="padding-left: ${indent}px">
-                <span class="folder-icon">${icon}</span>
+                <span class="${iconClass}">${icon}</span>
                 <span class="folder-name">${node.name}</span>
             </div>`;
 
-            if (hasChildren) {
-                // For now, always expanded for simplicity in this MVP
+            if (state.expanded) {
                 Object.values(node.children).forEach(child => {
                     html += buildHtml(child, depth + 1);
                 });
@@ -93,10 +123,14 @@ document.addEventListener('DOMContentLoaded', () => {
             return html;
         };
 
-        treeView.innerHTML = buildHtml(root);
+        if (!folders.length) {
+            treeView.innerHTML = `<div style="padding:1rem; color:var(--text-muted); text-align:center;">No folder structure defined for this preset.</div>`;
+        } else {
+            treeView.innerHTML = buildHtml(root);
+        }
 
         // Update Summary Card
-        previewProject.textContent = state.projectName || '—';
+        previewProject.textContent = state.projectName ? formatProjectName(state.projectName) : '—';
         previewClient.textContent = clientSelect.options[clientSelect.selectedIndex]?.text || '—';
         previewJob.textContent = state.jobNumber || '—';
     };
